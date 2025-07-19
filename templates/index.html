@@ -1,16 +1,42 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
     <title>YOLOv11 Object Detection</title>
-    <style>
-        body { text-align: center; background-color: #f4f4f4; font-family: Arial; }
-        h1 { color: #333; }
-        img { width: 80%; margin-top: 20px; border: 3px solid #222; }
-    </style>
 </head>
 <body>
-    <h1>Live Object Detection (YOLOv11 Medium)</h1>
-    <img src="{{ url_for('video_feed') }}">
+    <h2>Real-Time Object Detection (Client Camera)</h2>
+    <video id="video" width="640" height="480" autoplay></video>
+    <canvas id="canvas" style="display:none;"></canvas>
+    <img id="output" width="640" height="480" />
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const output = document.getElementById('output');
+        const ctx = canvas.getContext('2d');
+
+        navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+            video.srcObject = stream;
+        });
+
+        setInterval(() => {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0);
+            canvas.toBlob(blob => {
+                const formData = new FormData();
+                formData.append('image', blob);
+
+                fetch('/detect', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(res => res.blob())
+                .then(blob => {
+                    output.src = URL.createObjectURL(blob);
+                });
+            }, 'image/jpeg');
+        }, 500); // Send frame every 500ms
+    </script>
 </body>
 </html>
