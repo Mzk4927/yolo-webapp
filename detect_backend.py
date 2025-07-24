@@ -1,20 +1,18 @@
 # detect_backend.py
-
 from ultralytics import YOLO
 import cv2
 
-# Load model once
-model = YOLO("yolo11m.pt")
+model = YOLO("yolo11n.pt")  # Make sure this file exists
 
-# For image upload (used later)
-def detect_image(image_path):
-    results = model(image_path)
-    results[0].save(filename="static/output.jpg")
-    return "static/output.jpg"
+def detect_frame(img):
+    results = model.predict(source=img, conf=0.5, verbose=False)
+    annotated = results[0].plot()
+    
+    # Extract detected labels
+    labels = []
+    for box in results[0].boxes:
+        cls_id = int(box.cls[0])
+        label = model.names[cls_id]
+        labels.append(label)
 
-# For webcam frame-by-frame detection
-def detect_frame(frame):
-    results = model(frame)[0]
-    return results.plot()
-
-
+    return annotated, labels

@@ -2,7 +2,7 @@ from ultralytics import YOLO
 import cv2
 
 # Load your custom YOLOv11 model
-model = YOLO("yolo11m.pt")  # Updated model path
+model = YOLO("yolo11n.pt")  # Updated model path
 
 # --- Detection on Image ---
 def detect_image(image_path):
